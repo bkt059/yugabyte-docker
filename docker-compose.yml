@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  yb-master1:
+    image: yugabytedb/yugabyte:latest
+    container_name: yb-master-n1
+    command: [ "/home/yugabyte/bin/yb-master", "--fs_data_dirs=/mnt/data", "--rpc_bind_addresses=yb-master1:7100", "--server_broadcast_addresses=yb-master1:7100", "--master_addresses=yb-master1:7100,yb-master2:7100,yb-master3:7100", "--use_initial_sys_catalog_snapshot=true", "--replication_factor=3" ]
+    ports:
+      - "7000:7000"
+    volumes:
+      - yb-master-data1:/mnt/data
+
+  yb-master2:
+    image: yugabytedb/yugabyte:latest
+    container_name: yb-master-n2
+    command: [ "/home/yugabyte/bin/yb-master", "--fs_data_dirs=/mnt/data", "--rpc_bind_addresses=yb-master2:7100", "--server_broadcast_addresses=yb-master2:7100", "--master_addresses=yb-master1:7100,yb-master2:7100,yb-master3:7100", "--replication_factor=3" ]
+    volumes:
+      - yb-master-data2:/mnt/data
+
+  yb-master3:
+    image: yugabytedb/yugabyte:latest
+    container_name: yb-master-n3
+    command: [ "/home/yugabyte/bin/yb-master", "--fs_data_dirs=/mnt/data", "--rpc_bind_addresses=yb-master3:7100", "--server_broadcast_addresses=yb-master3:7100", "--master_addresses=yb-master1:7100,yb-master2:7100,yb-master3:7100", "--replication_factor=3" ]
+    volumes:
+      - yb-master-data3:/mnt/data
+
+  yb-tserver1:
+    image: yugabytedb/yugabyte:latest
+    container_name: yb-tserver-n1
+    command: [ "/home/yugabyte/bin/yb-tserver", "--fs_data_dirs=/mnt/data", "--rpc_bind_addresses=yb-tserver1:9100", "--start_pgsql_proxy", "--pgsql_proxy_bind_address=yb-tserver1:5433", "--server_broadcast_addresses=yb-tserver1:9100", "--tserver_master_addrs=yb-master1:7100,yb-master2:7100,yb-master3:7100" ]
+    ports:
+      - "5433:5433"
+      - "9000:9000"
+    volumes:
+      - yb-tserver-data1:/mnt/data
+
+  yb-tserver2:
+    image: yugabytedb/yugabyte:latest
+    container_name: yb-tserver-n2
+    command: [ "/home/yugabyte/bin/yb-tserver", "--fs_data_dirs=/mnt/data", "--rpc_bind_addresses=yb-tserver2:9100", "--start_pgsql_proxy", "--pgsql_proxy_bind_address=yb-tserver2:5433", "--server_broadcast_addresses=yb-tserver2:9100", "--tserver_master_addrs=yb-master1:7100,yb-master2:7100,yb-master3:7100" ]
+    volumes:
+      - yb-tserver-data2:/mnt/data
+
+  yb-tserver3:
+    image: yugabytedb/yugabyte:latest
+    container_name: yb-tserver-n3
+    command: [ "/home/yugabyte/bin/yb-tserver", "--fs_data_dirs=/mnt/data", "--rpc_bind_addresses=yb-tserver3:9100", "--start_pgsql_proxy", "--pgsql_proxy_bind_address=yb-tserver3:5433", "--server_broadcast_addresses=yb-tserver3:9100", "--tserver_master_addrs=yb-master1:7100,yb-master2:7100,yb-master3:7100" ]
+    volumes:
+      - yb-tserver-data3:/mnt/data
+
+volumes:
+  yb-master-data1:
+  yb-master-data2:
+  yb-master-data3:
+  yb-tserver-data1:
+  yb-tserver-data2:
+  yb-tserver-data3:
